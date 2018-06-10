@@ -1,0 +1,20 @@
+name: jira_api
+description: JIRA API
+version: 0.0.1
+author: "František Gažo <frantisek.gazo.313@gmail.com>"
+homepage: https://github.com/FrantisekGazo/jira-api-dart
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  meta: ^1.1.5
+  logging: ^0.11.3+1
+  http: ^0.11.3+16
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+environment:
+    sdk: ">=1.19.0 <2.0.0"
