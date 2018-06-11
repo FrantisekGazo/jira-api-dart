@@ -93,6 +93,6 @@ class JiraApi extends BaseApi {
 
   @override
   Future<Null> onAuthExpired() async {
-    _cookieJar.clear();
+    await _cookieJar.clear();
   }
 }

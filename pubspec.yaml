@@ -1,6 +1,6 @@
 name: jira_api
 description: JIRA API
-version: 0.0.1
+version: 0.0.1+1
 author: "František Gažo <frantisek.gazo.313@gmail.com>"
 homepage: https://github.com/FrantisekGazo/jira-api-dart
 

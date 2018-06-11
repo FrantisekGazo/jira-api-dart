@@ -7,13 +7,13 @@ import 'package:logging/logging.dart';
 /// Stores cookies.
 ///
 abstract class CookieJar {
-  void set(String key, String value);
+  Future<Null> set(String key, String value);
 
-  void clear();
+  Future<Null> clear();
 
-  String get(String key);
+  Future<String> get(String key);
 
-  Map<String, String> getAll();
+  Future<Map<String, String>> getAll();
 }
 
 ///
@@ -23,22 +23,22 @@ class DummyCookieJar implements CookieJar {
   final Map<String, String> _cookies = Map<String, String>();
 
   @override
-  String get(String key) {
+  Future<String> get(String key) async {
     return _cookies[key];
   }
 
   @override
-  Map<String, String> getAll() {
+  Future<Map<String, String>> getAll() async {
     return _cookies;
   }
 
   @override
-  void set(String key, String value) {
+  Future<Null> set(String key, String value) async {
     _cookies[key] = value;
   }
 
   @override
-  void clear() {
+  Future<Null> clear() async {
     _cookies.clear();
   }
 }
@@ -59,7 +59,7 @@ class InterceptorClient extends BaseClient {
 
   @override
   Future<StreamedResponse> send(BaseRequest request) async {
-    final String cookieHeader = _prepareCookieHeader();
+    final String cookieHeader = await _prepareCookieHeader();
     if (cookieHeader.isNotEmpty) {
       _log.fine("using cookies: $cookieHeader");
       request.headers[_REQUEST_COOKIE_HEADER_NAME] = cookieHeader;
@@ -76,34 +76,37 @@ class InterceptorClient extends BaseClient {
     return response;
   }
 
-  String _prepareCookieHeader() {
+  Future<String> _prepareCookieHeader() async {
     String cookieHeaderValue = "";
-    _cookieJar.getAll().forEach((key, value) {
+    final cookies = await _cookieJar.getAll();
+    cookies.forEach((key, value) {
       cookieHeaderValue += "$key=$value; ";
     });
     return cookieHeaderValue;
   }
 
-  void _storeCookies(StreamedResponse response) {
+  Future<Null> _storeCookies(StreamedResponse response) async {
     final String cookieHeader = response.headers[_RESPONSE_COOKIE_HEADER_NAME];
     if (cookieHeader == null) {
       return;
     }
 
     _log.fine("updating cookies...");
-    cookieHeader.replaceAll(",", ";").split(";").forEach((value) {
+    final cookieParts = cookieHeader.replaceAll(",", ";").split(";");
+    for (int i = 0; i < cookieParts.length; i++) {
+      final value = cookieParts[i];
       final List<String> vals = value.trim().split("=");
       if (vals.length != 2) {
-        return;
+        continue;
       }
 
       final key = vals[0];
       final val = vals[1];
 
       if (_targetCookies.contains(key)) {
-        _cookieJar.set(key, val);
+        await _cookieJar.set(key, val);
         _log.fine("updated cookie $key : $value");
       }
-    });
+    }
   }
 }
